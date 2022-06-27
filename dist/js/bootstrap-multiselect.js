@@ -220,9 +220,11 @@
         this.buildButton();
         this.buildDropdown();
         this.buildReset();
-        this.buildSelectAll();
-        this.buildDropdownOptions();
-        this.buildFilter();
+        if(!this.options.enableLazyLoad){
+            this.buildSelectAll();
+            this.buildDropdownOptions();
+            this.buildFilter();
+        }
         this.buildButtons();
 
         this.updateButtonText();
@@ -445,6 +447,7 @@
             numberDisplayed: 3,
             disableIfEmpty: false,
             disabledText: '',
+            enableLazyLoad:false,
             delimiterText: ', ',
             includeResetOption: false,
             includeResetDivider: false,
@@ -485,11 +488,27 @@
             else {
                 this.$container.on('show.bs.dropdown', this.options.onDropdownShow);
             }
+            if(this.options.enableLazyLoad) this.$container.on('show.bs.dropdown', $.proxy( this.lazyLoad, this ));
+            this.$container.on('show.bs.dropdown', this.options.onDropdownShow);
             this.$container.on('hide.bs.dropdown', this.options.onDropdownHide);
             this.$container.on('shown.bs.dropdown', this.options.onDropdownShown);
             this.$container.on('hidden.bs.dropdown', this.options.onDropdownHidden);
         },
 
+        /**
+         * Triggered when the dropdown is shown.
+         *
+         * @param {jQuery} event
+         */
+        lazyLoad: function(event) {
+            if(this.firstLazy){
+                this.buildSelectAll();
+                this.buildDropdownOptions();
+                this.buildFilter();
+                this.firstLazy = false;
+            }
+        },
+        firstLazy: true,
         /**
          * Builds the button of the multiselect.
          */
